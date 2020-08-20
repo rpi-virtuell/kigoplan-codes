@@ -41,9 +41,50 @@ function  print_kigoplan_codes(){
 
 	$html = '<textarea style="width:100%;min-height:600px;">'.$strcodes.'</textarea>';
 	$html .= '<b>'.count($codes).'</b> aktive Registrierungsschlüssel';
+
 	echo $html;
 
 }
+
+
+function print_kigoplan_as_csv(){
+	if(
+		isset($_GET["kigoplan_action"]) &&
+		$_GET["kigoplan_action"]=="export" &&
+		current_user_can('manage_options')
+	){
+
+		if(isset($_GET['jahr'])){
+			$year = sanitize_text_field($_GET['jahr']);
+		}else{
+			$year = null;
+		}
+
+
+		$codes = get_kigoplan_codes($year);
+
+		$csv =  "Schluessel;Registrierungsurl\n";
+
+		foreach ($codes as $c){
+			$csv .= "$c;https://" . home_url("/k/$c") ."\n";
+		}
+
+		header( "Content-type: application/vnd.ms-excel; charset=UTF-8" );
+		header("Content-Disposition: attachment; filename=kigoplan.csv");
+		header("Expires: 0");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Cache-Control: private",false);
+
+		echo trim(utf8_decode($csv));
+
+		die();
+
+	}
+}
+
+add_action('init', 'print_kigoplan_as_csv');
+
+
 
 function get_kigoplan_codes($year = null){
 

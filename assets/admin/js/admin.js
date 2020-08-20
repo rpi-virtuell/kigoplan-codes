@@ -5,8 +5,6 @@ jQuery(document).ready(function (jQuery) {
         var total = jQuery('#kigoplan_general_generate_codes_amount').val();
         var year = jQuery('#kigoplan_general_generate_codes_year').val();
 
-        alert(total);
-
         jQuery.ajax({
             type: 'POST',
             dataType: "json",

@@ -14,7 +14,7 @@ function kigoplan_register_form() {
 	}
 
 	// Check if the invite code is coming from a link
-	$tk_invite_code = ( ! empty( $_GET['invite_code'] ) ) ? sanitize_key( trim( $_GET['invite_code'] ) ) : '';
+	$tk_invite_code = ( ! empty( $_GET['code'] ) ) ? sanitize_key( trim( $_GET['code'] ) ) : '';
 
 	?>
     <p>
@@ -25,8 +25,21 @@ function kigoplan_register_form() {
 	<?php
 
 }
-
 add_action( 'register_form', 'kigoplan_register_form' );
+
+function check_kigoplan_shortlinks() {
+	if ( is_404() ) {
+		$uri = $_SERVER[ 'REQUEST_URI' ];
+		if ( strpos( $uri, '/k/') !== false ) {
+			$temp = (int) substr( $uri, 3 );
+			wp_redirect( wp_registration_url(). "&code=" . $temp);
+			exit;
+
+		}
+	}
+}
+add_filter('template_redirect', 'check_kigoplan_shortlinks' );
+
 /**
  * Validate the registration form element
  *
@@ -48,10 +61,9 @@ function kigoplan_registration_errors( $errors, $sanitized_user_login, $user_ema
 
 		$tk_invite_code = sanitize_key( trim( $_POST['tk_invite_code'] ) );
 
-		// Validate teh code
-		$result = kigoplan_validate_code( $tk_invite_code, $user_email );
-		if ( isset( $result['error'] ) ) {
-			$errors->add( 'tk_invite_code_error', sprintf( '<strong>%s</strong>: %s', __( 'ERROR', 'kigoplan-code' ), $result['error'] ) );
+		// Validate the code
+		if ( !kigoplan_validate_code( $tk_invite_code ) ) {
+			$errors->add( 'tk_invite_code_error', sprintf( '<strong>%s</strong>: %s', __( 'ERROR', 'kigoplan-code' ), __('Ungültiger Registrierungsschlüssel', 'kigoplan-code')  ) );
 		}
 
 	}
@@ -82,13 +94,12 @@ function kigo_code_registration_data($data, $update){
     if(!$update && kigoplan_is_default_registration() && !current_user_can('create_users')){
 	    $tk_invite_code = sanitize_key( trim( $_POST['tk_invite_code'] ) );
 
-	    // Validate teh code
-	    $result = kigoplan_validate_code( $tk_invite_code );
-	    if ( isset( $result['error'] ) ) {
-		    $errors->add( 'tk_invite_code_error', sprintf( '<strong>%s</strong>: %s', __( 'ERROR', 'kigoplan-code' ), $result['error'] ) );
+	    // Validate the code
+	    if ( !kigoplan_validate_code( $tk_invite_code ) ) {
+		    $errors->add( 'tk_invite_code_error', sprintf( '<strong>%s</strong>: %s', __( 'ERROR', 'kigoplan-code' ), 'Ungültiger oder fehlender Registrierungsschlüssel' ) );
 		    add_action('admin_notices', function(){
 			    $class = 'notice notice-error';
-			    $message = __( 'Solange Kigoplan Validation auf aktiv gesetzt ist, können auch im Backend keine neien benutzer hinzugefügt werden. ', 'kigoplan-code' );
+			    $message = __( 'Solange Kigoplan Validation auf aktiv gesetzt ist, können auch im Backend keine neuen benutzer hinzugefügt werden. ', 'kigoplan-code' );
 
 			    printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 		    });

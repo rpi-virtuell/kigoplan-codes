@@ -42,6 +42,7 @@ function kigoplan_admin_tabs( $current = 'general' ) {
 
 	$tabs         = apply_filters( 'kigoplan_admin_tabs', $tabs );
 	$tabs['generate'] = 'Schlüssel erzeugen';
+	$tabs['show'] = 'Anzeigen';
 	$tabs['export'] = 'Export';
 
 
@@ -228,6 +229,23 @@ function kigoplan_settings_page_tabs_content() {
 					<?php
 					break;
 				case 'export' :
+					?>
+				    <div class="metabox-holder">
+						<div class="postbox kigoplan-metabox">
+							<div class="inside">
+                                <p>
+                                <strong>Export als Exel Tabelle</strong>
+                                </p>
+                                <p>
+                                    <a class="button" href="/?kigoplan_action=export">Exel Tabelle herunterladen</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div><?php
+
+				    break;
+
+                case 'show' :
 
 
 					$kigoplan_export_templates = get_option( 'kigoplan_export_templates' );

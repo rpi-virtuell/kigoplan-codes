@@ -57,7 +57,7 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 		 */
 		public function __construct() {
 
-			register_activation_hook( __FILE__, array( $this, 'plugin_activation' ) );
+		    register_activation_hook( __FILE__, array( $this, 'plugin_activation' ) );
 
 			$this->load_constants();
 
@@ -71,7 +71,7 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 
 			add_action( 'wp_enqueue_scripts', array( $this, 'front_js_loader' ), 102, 1 );
 
-			add_filter( 'render_block',  array( $this, 'user_can_read_fullcontent' ), 999, 2 );
+			add_filter( 'render_block',  array( $this, 'user_can_read_fullcontent' ), 5, 2 );
 
 			register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivation' ) );
 		}
@@ -87,34 +87,34 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 			/**
 			 * Define the plugin version
 			 */
-			define( 'TK_ALL_IN_ONE_INVITE_CODES_VERSION', $this->version );
+			define( 'KIGOPLAN_CODES_VERSION', $this->version );
 
-			if ( ! defined( 'TK_ALL_IN_ONE_INVITE_CODES_PLUGIN_URL' ) ) {
+			if ( ! defined( 'KIGOPLAN_CODES_PLUGIN_URL' ) ) {
 				/**
 				 * Define the plugin url
 				 */
-				define( 'TK_ALL_IN_ONE_INVITE_CODES_PLUGIN_URL', plugins_url( '/', __FILE__ ) );
+				define( 'KIGOPLAN_CODES_PLUGIN_URL', plugins_url( '/', __FILE__ ) );
 			}
 
-			if ( ! defined( 'TK_ALL_IN_ONE_INVITE_CODES_INSTALL_PATH' ) ) {
+			if ( ! defined( 'KIGOPLAN_CODES_INSTALL_PATH' ) ) {
 				/**
 				 * Define the install path
 				 */
-				define( 'TK_ALL_IN_ONE_INVITE_CODES_INSTALL_PATH', dirname( __FILE__ ) . '/' );
+				define( 'KIGOPLAN_CODES_INSTALL_PATH', dirname( __FILE__ ) . '/' );
 			}
 
-			if ( ! defined( 'TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH' ) ) {
+			if ( ! defined( 'KIGOPLAN_CODES_INCLUDES_PATH' ) ) {
 				/**
 				 * Define the include path
 				 */
-				define( 'TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH', TK_ALL_IN_ONE_INVITE_CODES_INSTALL_PATH . 'includes/' );
+				define( 'KIGOPLAN_CODES_INCLUDES_PATH', KIGOPLAN_CODES_INSTALL_PATH . 'includes/' );
 			}
 
-			if ( ! defined( 'TK_ALL_IN_ONE_INVITE_CODES_TEMPLATE_PATH' ) ) {
+			if ( ! defined( 'KIGOPLAN_CODES_TEMPLATE_PATH' ) ) {
 				/**
 				 * Define the template path
 				 */
-				define( 'TK_ALL_IN_ONE_INVITE_CODES_TEMPLATE_PATH', TK_ALL_IN_ONE_INVITE_CODES_INSTALL_PATH . 'templates/' );
+				define( 'KIGOPLAN_CODES_TEMPLATE_PATH', KIGOPLAN_CODES_INSTALL_PATH . 'templates/' );
 			}
 
 		}
@@ -162,14 +162,14 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 		 */
 		public function includes() {
 
-			require_once( TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH . 'functions.php' );
-			require_once( TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH . 'default-registration.php' );
-			require_once( TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH . 'process-invite-code.php' );
-			require_once( TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH . 'generate-invite-codes.php' );
+			require_once( KIGOPLAN_CODES_INCLUDES_PATH . 'functions.php' );
+			require_once( KIGOPLAN_CODES_INCLUDES_PATH . 'default-registration.php' );
+			require_once( KIGOPLAN_CODES_INCLUDES_PATH . 'process-invite-code.php' );
+			require_once( KIGOPLAN_CODES_INCLUDES_PATH . 'generate-invite-codes.php' );
 
 			if ( is_admin() ) {
-				require_once( TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH . '/admin/admin-settings.php' );
-				require_once( TK_ALL_IN_ONE_INVITE_CODES_INCLUDES_PATH . '/admin/invite-codes-post-type.php' );
+				require_once( KIGOPLAN_CODES_INCLUDES_PATH . '/admin/admin-settings.php' );
+				require_once( KIGOPLAN_CODES_INCLUDES_PATH . '/admin/invite-codes-post-type.php' );
 			}
 		}
 
@@ -254,34 +254,62 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 			}
 
 		}
+
+		/**
+         * Überprüft ob der aktuelle User angemeldet und unter einem noch gültigen Code registriert ist
+         *
+		 * @return bool
+		 */
+		function user_has_valid_registercode(){
+		    if (current_user_can('manage_options')){
+			    return true;
+            }elseif( is_user_logged_in() ){
+				$endtime = get_user_meta(get_current_user_id(),'kigoplan-validtime',true);
+				$post = get_post();
+				if($post){
+					$valid = strtotime( $post->post_date ) < $endtime;
+					return $valid;
+                }
+			}else{
+			    return false;
+            }
+
+		}
+
+		/**
+         * Überprüft, ob der aktuelle User Zugriff auf einen Inhlatsblock hat
+         *
+		 * @param $block_content
+		 * @param $block
+		 *
+		 * @return string
+		 */
         function user_can_read_fullcontent($block_content, $block){
 
-		    if( is_user_logged_in() && !current_user_can('manage_options') && (isset($block['attrs']['editorskit']['loggedin'])   || isset($block['attrs']['editorskit']['loggedout'] ) )){
 
+	        if(isset($block['attrs']['editorskit']['loggedin'])) {
 
-
-			    $endtime = get_user_meta(get_current_user_id(),'kigoplan-validtime',true);
-			    $post = get_post();
-			    $valid = strtotime( $post->post_date ) < $endtime;
-                $show = ($block['attrs']['editorskit']['loggedin'] === true);
-                $hide = ($block['attrs']['editorskit']['loggedout'] === true);
-
-
-
-                if($show && $valid){
-	                return $block_content;
-                }elseif ($show && !$valid){
-                    return '';
-                }elseif ($hide && $valid){
-	                return '';
-                }elseif ($hide && !$valid){
-
-                	return do_shortcode( strval($block['innerHTML']) );
+	            if($block['attrs']['editorskit']['loggedin'] === true){
+		           if($this->user_has_valid_registercode()){
+		               return $block_content;
+                   } else {
+			           return '';
+                   }
                 }
 
-            }else{
-			    return $block_content;
-            }
+		        if($block['attrs']['editorskit']['loggedin'] === false){
+
+		            if($this->user_has_valid_registercode()){
+				        return '';
+			        } else {
+		               return do_shortcode($block['innerHTML']);
+			        }
+		        }
+	        }
+	        return $block_content;
+
+
+
 
         }
 
@@ -328,9 +356,6 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 
 	activate_kigoplan_at_plugin_loader();
 
-	function remove_editor_kits_render(){
-		remove_action( 'render_block', array( 'EditorsKit_Render_Block', 'render_block' ), 5, 2 );
-	}
-	add_action('wp_head', 'remove_editor_kits_render');
+
 }
 
