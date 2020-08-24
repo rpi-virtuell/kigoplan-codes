@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: Kigoplan Codes
- * Plugin URI:  https://themekraft.com/kigoplan-codes/
+ * Plugin URI:  https://github.com/johappel/kigoplan-codes
  * Description: Erstellt Registreirungsschlüssel für die Kigoplan Seite.
  * Version: 100.0.5
  * Author: Joachim Happel
