@@ -66,7 +66,7 @@ function print_kigoplan_as_csv(){
 		$csv =  "Schluessel;Registrierungsurl\n";
 
 		foreach ($codes as $c){
-			$csv .= "$c;https://" . home_url("/k/$c") ."\n";
+			$csv .= "$c;" . home_url("/k/$c") ."\n";
 		}
 
 		header( "Content-type: application/vnd.ms-excel; charset=UTF-8" );

@@ -18,7 +18,7 @@ function kigoplan_register_form() {
 
 	?>
     <p>
-        <label for="tk_invite_code"><?php _e( 'Invitation Code', 'kigoplan-code' ) ?><br/>
+        <label for="tk_invite_code"><?php _e( 'Registrierungsschlüssel', 'kigoplan-code' ) ?><br/>
             <input type="text" name="tk_invite_code" id="tk_invite_code" class="input"
                    value="<?php echo esc_attr( $tk_invite_code ); ?>" size="25"/></label>
     </p>
@@ -33,6 +33,11 @@ function check_kigoplan_shortlinks() {
 		if ( strpos( $uri, '/k/') !== false ) {
 			$temp = (int) substr( $uri, 3 );
 			wp_redirect( wp_registration_url(). "&code=" . $temp);
+			exit;
+
+		}
+		if ( strpos( $uri, '/registrieren') !== false ) {
+			wp_redirect( wp_registration_url());
 			exit;
 
 		}
@@ -56,7 +61,7 @@ function kigoplan_registration_errors( $errors, $sanitized_user_login, $user_ema
 	}
 	// Check if the field has a code
 	if ( empty( $_POST['tk_invite_code'] ) || ! empty( $_POST['tk_invite_code'] ) && trim( $_POST['tk_invite_code'] ) == '' ) {
-		$errors->add( 'tk_invite_code_error', sprintf( '<strong>%s</strong>: %s', __( 'ERROR', 'kigoplan-code' ), __( 'You must include a Invite Code.', 'kigoplan-code' ) ) );
+		$errors->add( 'tk_invite_code_error', sprintf( '<strong>%s</strong>: %s', __( 'ERROR', 'kigoplan-code' ), __( 'You must include a Kigoplan Code.', 'kigoplan-code' ) ) );
 	} else {
 
 		$tk_invite_code = sanitize_key( trim( $_POST['tk_invite_code'] ) );
