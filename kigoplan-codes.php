@@ -290,7 +290,7 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 	        if(isset($block['attrs']['editorskit']['loggedin'])) {
 
 	            if($block['attrs']['editorskit']['loggedin'] === true){
-		           if($this->user_has_valid_registercode()){
+		           if($this->user_has_valid_registercode() || current_user_can('edit_posts')){
 		               return $block_content;
                    } else {
 			           return '';
@@ -332,7 +332,7 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 	}
 
 
-	
+
 	function kigoplan_php_version_admin_notice() {
 		?>
         <div class="notice notice-error is-dismissible">
@@ -350,7 +350,7 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 		} else {
 			// Init KigoplanCodes.
 			$GLOBALS['kigoplan_new'] = new KigoplanCodes();
-			
+
 		}
 	}
 
