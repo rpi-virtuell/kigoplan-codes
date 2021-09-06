@@ -32,7 +32,7 @@ function check_kigoplan_shortlinks() {
 		$uri = $_SERVER[ 'REQUEST_URI' ];
 		if ( strpos( $uri, '/k/') !== false ) {
 			$temp = (string) substr( $uri, 3 );
-			wp_redirect( wp_registration_url(). "&code=" . $temp);
+			wp_redirect( wp_registration_url(). "&code=" . $temp); 
 			exit;
 
 		}

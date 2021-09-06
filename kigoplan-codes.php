@@ -302,9 +302,12 @@ if ( ! class_exists( 'KigoplanCodes' ) ) {
 		            if($this->user_has_valid_registercode()){
 				        return '';
 			        } else {
-		               return do_shortcode($block['innerHTML']);
+
+			            return do_shortcode($block_content);
 			        }
 		        }
+
+
 	        }
 	        return $block_content;
 
